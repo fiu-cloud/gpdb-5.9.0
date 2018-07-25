@@ -4,7 +4,7 @@ RUN echo root:pivotal | chpasswd \
     && apt-get update && apt-get install -y software-properties-common \
     && add-apt-repository ppa:greenplum/db \
     && apt-get update && apt-get install -y greenplum-db-oss vim openssh-server
-COPY gppkg/* /tmp/
+#COPY gppkg/* /tmp/
 COPY config/* /tmp/
 
 RUN cat /tmp/sysctl.conf.add >> /etc/sysctl.conf \
