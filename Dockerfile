@@ -4,7 +4,7 @@ RUN echo root:pivotal | chpasswd \
     && apt-get update && apt-get install -y software-properties-common \
     && add-apt-repository ppa:greenplum/db \
     && apt-get update && apt-get install -y greenplum-db-oss vim openssh-server
-
+COPY gppkg/* /tmp/
 COPY config/* /tmp/
 
 RUN cat /tmp/sysctl.conf.add >> /etc/sysctl.conf \
@@ -17,7 +17,6 @@ RUN cat /tmp/sysctl.conf.add >> /etc/sysctl.conf \
     && mv /tmp/stop_gp.sh /usr/local/bin/stop_gp.sh \
     && chmod +x /usr/local/bin/start_gp.sh /usr/local/bin/stop_gp.sh \
     && localedef -i en_US -f UTF-8 en_US.UTF-8
-
 
 RUN useradd gpadmin -s /bin/bash -U
 
@@ -32,6 +31,6 @@ EXPOSE 5432 22
 VOLUME /gpdata
 CMD ["/bin/bash", "-c", "start_gp.sh && /bin/bash"]
 
-#docker build . -t fiucloud/gpdb-5.9.0
-#docker run --name my-gp -i -t -p 5432:5432 -d fiucloud/gpdb-5.9.0
-#docker exec -i -t my-gp /bin/bash
+#docker build . -t fiucloud/gpdb-analytics
+#docker run --name gpdb-analytics -i -t -p 5432:5432 -d fiucloud/gpdb-analytics
+#docker exec -i -t gpdb-analytics /bin/bash
