@@ -1,0 +1,42 @@
+CREATE OR REPLACE FUNCTION write_to_s3() RETURNS integer AS
+   '$libdir/gps3ext.so', 's3_export' LANGUAGE C STABLE;
+
+CREATE OR REPLACE FUNCTION read_from_s3() RETURNS integer AS
+   '$libdir/gps3ext.so', 's3_import' LANGUAGE C STABLE;
+
+CREATE PROTOCOL s3 (writefunc = write_to_s3, readfunc = read_from_s3);
+
+
+vi s3.config
+
+[default]
+secret = ""
+accessid = ""
+threadnum = 4
+chunksize = 67108864
+low_speed_limit = 10240
+low_speed_time = 60
+encryption = true
+version = 1
+proxy = ""
+autocompress = true
+verifycert = true
+server_side_encryption = ""
+# gpcheckcloud config
+gpcheckcloud_newline = "\n"
+
+gpcheckcloud -c "s3://s3-ap-southeast-2.amazonaws.com/ifs-cloud/mock.csv config=/home/gpadmin/s3.config
+
+CREATE READABLE EXTERNAL TABLE MOCK (key text, value text)
+   LOCATION('s3://s3-ap-southeast-2.amazonaws.com/ifs-cloud/mock.csv config=/home/gpadmin/s3.config')
+   FORMAT 'csv';
+
+CREATE WRITABLE EXTERNAL TABLE MOCK2 (LIKE MOCK) LOCATION('s3://s3-ap-southeast-2.amazonaws.com/ifs-cloud/mock2.csv config=/home/gpadmin/s3.config') FORMAT 'csv';
+
+
+INSERT INTO MOCK2 SELECT * FROM MOCK;
+
+# aws s3 ls
+# aws s3 ls s3://ifs-cloud/
+# aws s3api get-object --bucket ifs-cloud --key mock.csv mock.csv
+#
